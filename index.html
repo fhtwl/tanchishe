@@ -52,11 +52,11 @@
     <div id="map">
 
     </div>
+    <p>使用上下左右方向键控制方向，点击开始按钮开始</p>
     <div id="start">开始</div>
-
-    <script src="jquery-1.12.4.js"></script>
+    <div id="stop">暂停</div>
     <script>
-        $(document).ready(function () {
+        window.onload = function () {
             var box = "";
             for (let i = 0 ; i < 20 ; i++) {
                 box += '<div class="row">';
@@ -65,12 +65,14 @@
                 }
                 box += '</div>';
             }
-            //蛇
-            $("#map").append(box);
             var map = document.getElementById("map");
             var mapy = map.getElementsByClassName("row");
             var start = document.getElementById("start");
+            var stop = document.getElementById("stop");
             var time;
+            //创建地图
+            map.innerHTML = box;
+            //蛇
             function Snake() {
                 this.body = [{x:10,y:8},{x:10,y:9},{x:10,y:10}];
                 this.direction = "top";
@@ -157,6 +159,7 @@
                     }
                 }
             }
+
             //创建对象
             var snake = new Snake();
             snake.show();
@@ -169,6 +172,10 @@
                 snake.show();
                 clearInterval(time);
                 time = setInterval(snake.run,10000/(snake.body.length+20))
+            };
+            stop.onclick = function () {
+                //初始化
+                clearInterval(time);
             };
             document.body.onkeydown = function (event) {
                 switch (event.keyCode) {
@@ -188,7 +195,7 @@
                 console.log(snake);
             };
 
-        })
+        }
 
     </script>
 
