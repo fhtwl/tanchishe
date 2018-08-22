@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        * {
+            margin:0;
+            padding:0;
+        }
+        #map {
+            border:1px solid #888;
+            width:400px;
+            height:400px;
+            margin:50px auto;
+        }
+        #map .row {
+            width:400px;
+            height:20px;
+        }
+        #map .item {
+            width:20px;
+            height:20px;
+            outline: #999 1px solid;
+            float:left;
+            background:#eee;
+        }
+        #map .hui {
+            background:#ccc;
+        }
+        #map .hei {
+            background:#000 !important;
+        }
+        #map .food {
+            background:#666;
+        }
+        #start {
+            width:80px;
+            height:28px;
+            line-height: 28px;
+            background:dodgerblue;
+            text-align: center;
+            margin:0 auto;
+            color:#fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="map">
+
+    </div>
+    <div id="start">开始</div>
+
+    <script src="jquery-1.12.4.js"></script>
+    <script>
+        $(document).ready(function () {
+            var box = "";
+            for (let i = 0 ; i < 20 ; i++) {
+                box += '<div class="row">';
+                for(let j = 0 ; j < 20 ;j++) {
+                    box += '<div class="item hui"></div>';
+                }
+                box += '</div>';
+            }
+            //蛇
+            $("#map").append(box);
+            var map = document.getElementById("map");
+            var mapy = map.getElementsByClassName("row");
+            var start = document.getElementById("start");
+            var time;
+            function Snake() {
+                this.body = [{x:10,y:8},{x:10,y:9},{x:10,y:10}];
+                this.direction = "top";
+                this.show = function() {
+                    for(let i in this.body) {
+                        mapy[this.body[i].y].getElementsByClassName("item")[this.body[i].x].className += " hei";
+                    }
+                    for(let i in this.body) {
+                        mapy[this.body[i].y].getElementsByClassName("item")[this.body[i].x].style.borderRadius = "0";
+                    }
+                    mapy[this.body[0].y].getElementsByClassName("item")[this.body[0].x].style.borderRadius = "50%";
+                };
+                var that = this;
+                console.log(that.body);
+                this.run = function() {
+                    for(let i in that.body) {
+                        mapy[that.body[i].y].getElementsByClassName("item")[that.body[i].x].classList.remove("hei");
+                    }
+                    for(let i = that.body.length-1;i > 0 ; i--) {
+                        that.body[i].x = that.body[i-1].x;
+                        that.body[i].y = that.body[i-1].y;
+                    }
+                    switch (that.direction) {
+                        case "top":
+                            that.body[0].y -= 1;
+                            break;
+                        case "footer":
+                            that.body[0].y +=1;
+                            break;
+                        case "left":
+                            that.body[0].x -= 1;
+                            break;
+                        case "right":
+                            that.body[0].x += 1;
+                            break;
+                    }
+                    if(that.body[0].y >= 20  || that.body[0].y < 0 || that.body[0].x >= 20 || that.body[0].x < 0) {
+                        clearInterval(time);
+                        alert("游戏失败");
+                        mapy[that.body[1].y].getElementsByClassName("item")[that.body[1].x].style.borderRadius = "0";
+                    }
+                    for(var i in food.arr) {
+                        if(that.body[0].x == food.arr[i].x && that.body[0].y == food.arr[i].y) {
+                           mapy[that.body[0].y].getElementsByClassName("item")[that.body[0].x].classList.remove("food");
+                           food.arr.splice(i,1);
+                           if(that.body[that.body.length-1].x == that.body[that.body.length-2].x ) {
+                               if(that.body[that.body.length-1].y > that.body[that.body.length-2].y) {
+                                   that.body.push({x:that.body[that.body.length-1].x,y:that.body[that.body.length-1].y+1});
+                               }
+                               else {
+                                   that.body.push({x:that.body[that.body.length-1].x,y:that.body[that.body.length-1].y-1});
+                               }
+                           }
+                           else {
+                                if( that.body[that.body.length-1].x > that.body[that.body.length-2].x) {
+                                    that.body.push({x:that.body[that.body.length-1].x+1,y:that.body[that.body.length-1].y});
+                                }
+                                else {
+                                    that.body.push({x:that.body[that.body.length-1].x-1,y:that.body[that.body.length-1].y});
+                                }
+                           }
+
+                       }
+                   }
+                   food.change();
+                   that.show();
+                   console.log(food.arr);
+                }
+            }
+            //食物
+            function Food() {
+                this.arr = [];
+                var that = this;
+                this.show = function () {
+                    for (let i = 0 ; i < 20 ; i++) {
+                        let x = parseInt(Math.random()*20);
+                        let y = parseInt(Math.random()*20);
+                        that.arr.push({x:x,y:y});
+                    }
+                };
+                this.change = function () {
+                    for(let i in that.arr) {
+                        mapy[that.arr[i].y].getElementsByClassName("item")[that.arr[i].x].className += " food";
+                    }
+                }
+            }
+            //创建对象
+            var snake = new Snake();
+            snake.show();
+            var food = new Food();
+            food.show();
+            food.change();
+            start.onclick = function () {
+                //初始化
+                snake.body = [{x:10,y:8},{x:10,y:9},{x:10,y:10}];
+                snake.show();
+                clearInterval(time);
+                time = setInterval(snake.run,10000/(snake.body.length+20))
+            };
+            document.body.onkeydown = function (event) {
+                switch (event.keyCode) {
+                    case 38:
+                        snake.direction = "top";
+                        break;
+                    case 40:
+                        snake.direction = "footer";
+                        break;
+                    case 37:
+                        snake.direction = "left";
+                        break;
+                    case 39:
+                        snake.direction = "right";
+                        break;
+                }
+                console.log(snake);
+            };
+
+        })
+
+    </script>
+
+</body>
+</html>
